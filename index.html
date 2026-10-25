@@ -19,6 +19,14 @@ button{border:0;border-radius:12px;background:var(--accent);color:#1c2118;font-s
 <main>
   <header class="top"><div class="logo">☢️</div><div><div class="eyebrow">SURVIVAL PARTY GAME</div><div class="title">OXIRGI BOSHPANA</div><div class="sub">O‘zbekcha karta o‘yini · Dastlabki prototip</div></div></header>
   <section id="home" class="panel">
+    <div class="panel">
+  <h2>Onlayn o‘yin</h2>
+  <button id="createRoom">Xona yaratish</button>
+  <p id="roomMessage">Do‘stlaring bilan o‘ynash uchun xona yarat.</p>
+  <label for="roomCode">Xona kodi</label>
+  <input id="roomCode" placeholder="Masalan: AB12CD">
+  <button id="joinRoom">Xonaga qo‘shilish</button>
+    </div>
     <h2>Boshpana hali ochiq</h2>
     <p class="muted">Falokatdan keyin hamma omon qololmaydi. O‘z kartalaringni och, boshqalarning dalillarini tingla va kim boshpanada qolishini tanla.</p>
     <label for="nickname">O‘yinchi nomi</label><input id="nickname" maxlength="20" placeholder="Masalan: Sardor" value="O‘yinchi 1">
@@ -69,6 +77,48 @@ $("rules").onclick=()=>$("rulesBox").classList.toggle("hidden");$("closeRules").
 $("voteStart").onclick=()=>{$("votePanel").classList.remove("hidden");$("voteOptions").innerHTML=state.people.map((p,i)=>`<button class="vote" data-i="${i}">${esc(p.name)}</button>`).join("");$("voteOptions").querySelectorAll("button").forEach(b=>b.onclick=()=>{state.selected=+b.dataset.i;$("voteOptions").querySelectorAll("button").forEach(x=>x.classList.toggle("selected",x===b))});$("result").textContent="";$("votePanel").scrollIntoView({behavior:"smooth"})};
 $("submitVote").onclick=()=>{if(state.selected===null){$("result").textContent="Avval o‘yinchini tanlang.";return}const p=state.people[state.selected];$("result").innerHTML=`<div class="panel"><div class="status">DEMO NATIJASI</div><h2>${esc(p.name)}</h2><p>Bu demo ovozi. Haqiqiy o‘yinda barcha o‘yinchilarning ovozlari serverda jamlanadi.</p></div>`};
 const socket = io("https://oxirgi-boshpana-server.onrender.com");
+let roomCode = "";
+
+$("createRoom").onclick = () => {
+  const name = $("nickname").value.trim() || "O‘yinchi";
+
+  socket.emit("createRoom", name, (result) => {
+    if (result && result.ok) {
+      roomCode = result.code;
+      $("roomCode").value = result.code;
+      $("roomMessage").textContent =
+        "Xona yaratildi! Do‘stlaringga shu kodni yubor: " + result.code;
+    } else {
+      $("roomMessage").textContent = "Xona yaratilmadi. Qayta urinib ko‘r.";
+    }
+  });
+};
+
+$("joinRoom").onclick = () => {
+  const code = $("roomCode").value.trim().toUpperCase();
+  const name = $("nickname").value.trim() || "O‘yinchi";
+
+  if (!code) {
+    $("roomMessage").textContent = "Avval xona kodini kiriting.";
+    return;
+  }
+
+  socket.emit("joinRoom", { code, name }, (result) => {
+    if (result && result.ok) {
+      roomCode = result.code;
+      $("roomMessage").textContent = "Xonaga muvaffaqiyatli qo‘shildingiz: " + result.code;
+    } else {
+      $("roomMessage").textContent =
+        result && result.error ? result.error : "Xonaga qo‘shilib bo‘lmadi.";
+    }
+  });
+};
+
+socket.on("playersUpdated", (players) => {
+  $("roomMessage").textContent =
+    "Xonadagi o‘yinchilar (" + players.length + "): " +
+    players.map(p => p.name).join(", ");
+});
 </script>
 </body>
 </html>
