@@ -42,6 +42,10 @@ button{border:0;border-radius:12px;background:var(--accent);color:#1c2118;font-s
     <section class="panel"><h2 id="cardHeading">Kartalaringizni oching</h2><p class="muted">Demo uchun kartalarni navbat bilan ochish mumkin. Haqiqiy yashirin kartalar multiplayerda server orqali boshqariladi.</p><div id="cards" class="cards"></div><div class="row" style="margin-top:14px"><button id="voteStart">Ovoz berishga o‘tish</button><button id="restart" class="secondary">Qayta boshlash</button></div></section>
     <section id="votePanel" class="panel hidden"><h2>Kim boshpanada qolmasin?</h2><p class="muted">Bitta o‘yinchini tanlang va ovozni yuboring.</p><div id="voteOptions"></div><button id="submitVote" style="width:100%;margin-top:10px">Ovoz berish natijasini ko‘rish</button><div id="result" style="margin-top:14px"></div></section>
   </section>
+  <section id="onlineGame" class="panel hidden">
+  <h2>🎴 Onlayn o‘yin — mening kartalarim</h2>
+  <div id="onlineCards"></div>
+</section>
   <div class="footer">Prototip 0.1 · Original loyiha · “Bunker” nomi yoki materiallarini ko‘chirmaydi</div>
 </main>
 <script>
@@ -121,22 +125,14 @@ socket.on("playersUpdated", (players) => {
     players.map(p => p.name).join(", ");
 });
 socket.on("privateCards", (cards) => {
-  let area = document.getElementById("myCards");
+  $("onlineGame").classList.remove("hidden");
 
-  if (!area) {
-    area = document.createElement("section");
-    area.id = "myCards";
-    area.className = "panel";
-    document.querySelector("main").appendChild(area);
-  }
-
-  area.innerHTML = "<h2>🎴 Mening kartalarim</h2>";
+  const area = $("onlineCards");
+  area.innerHTML = "";
 
   for (const [type, value] of Object.entries(cards)) {
     const card = document.createElement("div");
     card.className = "panel";
-    card.style.margin = "10px 0";
-    card.innerHTML = "";
 
     const heading = document.createElement("h3");
     heading.textContent = type;
