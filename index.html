@@ -22,7 +22,8 @@ button{border:0;border-radius:12px;background:var(--accent);color:#1c2118;font-s
     <div class="panel">
   <h2>Onlayn o‘yin</h2>
   <button id="createRoom">Xona yaratish</button>
-  <p id="roomMessage">Do‘stlaring bilan o‘ynash uchun xona yarat.</p>
+  <button id="startGame">O‘yinni boshlash</button>
+      <p id="roomMessage">Do‘stlaring bilan o‘ynash uchun xona yarat.</p>
   <label for="roomCode">Xona kodi</label>
   <input id="roomCode" placeholder="Masalan: AB12CD">
   <button id="joinRoom">Xonaga qo‘shilish</button>
@@ -151,6 +152,19 @@ socket.on("privateCards", (cards) => {
 socket.on("gameStarted", (data) => {
   $("roomMessage").textContent = data.message || "O‘yin boshlandi!";
 });
+$("startGame").onclick = () => {
+  if (!roomCode) {
+    $("roomMessage").textContent = "Avval xona yarat yoki unga qo‘shil.";
+    return;
+  }
+
+  socket.emit("startGame", roomCode, (result) => {
+    if (!result || !result.ok) {
+      $("roomMessage").textContent =
+        result && result.error ? result.error : "O‘yinni boshlash amalga oshmadi.";
+    }
+  });
+};
 </script>
 </body>
 </html>
