@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101813">
+<title>Oxirgi Boshpana — prototip</title>
+<style>
+:root{--bg:#101813;--panel:#1b2820;--panel2:#24352a;--text:#f3f2e9;--muted:#b6c3b8;--accent:#d9b76d;--red:#df7770;--green:#8ed0a1}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#26392b 0,#101813 60%);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;min-height:100vh}
+main{max-width:760px;margin:auto;padding:18px 14px 42px}.top{display:flex;align-items:center;gap:12px;margin-bottom:18px}.logo{font-size:34px}.eyebrow{color:var(--accent);font-size:12px;letter-spacing:2px;font-weight:800}.title{font-size:25px;font-weight:900;line-height:1.1}.sub{color:var(--muted);font-size:13px;margin-top:5px}
+.panel{background:rgba(27,40,32,.96);border:1px solid #3b5140;border-radius:18px;padding:16px;margin:12px 0;box-shadow:0 12px 30px #0002}
+h2{font-size:18px;margin:0 0 10px}p{line-height:1.45}.muted{color:var(--muted)}label{display:block;font-size:13px;color:var(--muted);margin:12px 0 5px}input,select{width:100%;padding:13px;border-radius:11px;border:1px solid #526656;background:#111b14;color:var(--text);font-size:16px}
+button{border:0;border-radius:12px;background:var(--accent);color:#1c2118;font-size:15px;font-weight:800;padding:13px 15px;cursor:pointer}button.secondary{background:#34483a;color:var(--text);border:1px solid #526656}button.danger{background:#653b37;color:#fff}button:disabled{opacity:.45;cursor:not-allowed}.row{display:flex;gap:8px;flex-wrap:wrap}.row>*{flex:1}.hidden{display:none!important}.notice{font-size:12px;color:var(--muted);border-left:3px solid var(--accent);padding-left:10px;margin-top:12px}.players{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:9px}.player{border:1px solid #405544;background:#17231a;border-radius:13px;padding:12px}.player strong{display:block;margin-bottom:5px}.tag{display:inline-block;font-size:11px;border-radius:99px;padding:4px 8px;background:#334737;color:#dce9dd;margin:2px 3px 2px 0}.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.card{min-height:135px;border:1px solid #61704d;background:linear-gradient(145deg,#344b36,#1a281e);border-radius:14px;padding:13px;text-align:left;color:var(--text);display:flex;flex-direction:column;justify-content:space-between}.card .kind{font-size:11px;color:var(--accent);font-weight:900;letter-spacing:1px}.card .value{font-size:18px;font-weight:850;margin:10px 0}.card .hint{font-size:12px;color:var(--muted)}.card.revealed{background:linear-gradient(145deg,#3c4933,#26372a);border-color:var(--accent)}.vote{width:100%;text-align:left;background:#26392b;color:var(--text);border:1px solid #4b604d;margin:5px 0}.vote.selected{outline:2px solid var(--accent)}.status{font-size:12px;color:var(--green);font-weight:700}.footer{font-size:11px;color:#8f9e91;text-align:center;margin-top:22px}
+@media(min-width:600px){main{padding-top:28px}.title{font-size:32px}.cards{grid-template-columns:repeat(3,minmax(0,1fr))}}
+</style>
+</head>
+<body>
+<main>
+  <header class="top"><div class="logo">☢️</div><div><div class="eyebrow">SURVIVAL PARTY GAME</div><div class="title">OXIRGI BOSHPANA</div><div class="sub">O‘zbekcha karta o‘yini · Dastlabki prototip</div></div></header>
+  <section id="home" class="panel">
+    <h2>Boshpana hali ochiq</h2>
+    <p class="muted">Falokatdan keyin hamma omon qololmaydi. O‘z kartalaringni och, boshqalarning dalillarini tingla va kim boshpanada qolishini tanla.</p>
+    <label for="nickname">O‘yinchi nomi</label><input id="nickname" maxlength="20" placeholder="Masalan: Sardor" value="O‘yinchi 1">
+    <label for="count">Demo o‘yinchilar soni</label><select id="count"><option value="3">3 o‘yinchi</option><option value="4" selected>4 o‘yinchi</option><option value="5">5 o‘yinchi</option><option value="6">6 o‘yinchi</option><option value="7">7 o‘yinchi</option><option value="8">8 o‘yinchi</option></select>
+    <div class="row" style="margin-top:14px"><button id="start">Demo o‘yinni boshlash</button><button id="rules" class="secondary">Qoidalar</button></div>
+    <div class="notice">Bu hozircha bitta telefonda sinash uchun demo. Internet multiplayer va haqiqiy xona kodlari keyingi bosqichda serverga ulanadi.</div>
+  </section>
+  <section id="rulesBox" class="panel hidden"><h2>Qoidalar</h2><p>1. Har bir o‘yinchiga tasodifiy kartalar beriladi.</p><p>2. Kartalarni bosib, birma-bir oching.</p><p>3. O‘yinchilar o‘zini boshpanada qolishga munosib ekanini tushuntiradi.</p><p>4. Ovoz berish bosqichida bitta o‘yinchini tanlang. Demo yakunda natijani ko‘rsatadi.</p><button id="closeRules" class="secondary">Yopish</button></section>
+  <section id="game" class="hidden">
+    <section class="panel"><div class="eyebrow">VAZIYAT</div><h2 id="disaster">Global falokat</h2><p id="scenario" class="muted"></p><div class="row"><div><span class="tag">Boshpana sig‘imi: 3 kishi</span></div><div><span class="tag" id="roundTag">1-raund</span></div></div></section>
+    <section class="panel"><h2>O‘yinchilar</h2><div id="players" class="players"></div></section>
+    <section class="panel"><h2 id="cardHeading">Kartalaringizni oching</h2><p class="muted">Demo uchun kartalarni navbat bilan ochish mumkin. Haqiqiy yashirin kartalar multiplayerda server orqali boshqariladi.</p><div id="cards" class="cards"></div><div class="row" style="margin-top:14px"><button id="voteStart">Ovoz berishga o‘tish</button><button id="restart" class="secondary">Qayta boshlash</button></div></section>
+    <section id="votePanel" class="panel hidden"><h2>Kim boshpanada qolmasin?</h2><p class="muted">Bitta o‘yinchini tanlang va ovozni yuboring.</p><div id="voteOptions"></div><button id="submitVote" style="width:100%;margin-top:10px">Ovoz berish natijasini ko‘rish</button><div id="result" style="margin-top:14px"></div></section>
+  </section>
+  <div class="footer">Prototip 0.1 · Original loyiha · “Bunker” nomi yoki materiallarini ko‘chirmaydi</div>
+</main>
+<script>
+const decks={
+ "KASB":["Shifokor","Muhandis","Agronom","O‘qituvchi","Elektrik","Oshpaz","Qutqaruvchi","Dasturchi","Veterinar","Mexanik","Psixolog","Geolog"],
+ "SOG‘LIQ":["Sog‘lom","Yengil allergiya","Qo‘li singan, bitish jarayonida","Kuchli immunitet","Uyqusizlik muammosi","Birinchi yordamni biladi","Sovuqqa chidamli"],
+ "KO‘NIKMA":["Suvni tozalay oladi","Radio aloqa tuzadi","O‘simlik yetishtiradi","Oziq-ovqatni uzoq saqlaydi","Jamoani tinchlantiradi","Asboblarni ta’mirlaydi","Iz qoldirmay yuradi"],
+ "SIR":["Boshpananing eski xaritasini biladi","Yashirin oziq-ovqat zaxirasi bor","Bir kishiga qarzdor","O‘tmishda qutqaruvchi bo‘lgan","Muhim signalni eshitgan","Jamoada kimnidir taniydi"]
+};
+const disasters=[
+["Kuchli quyosh bo‘roni","Elektr tarmoqlari ishdan chiqqan. Tashqarida aloqa vositalari ishlamasligi mumkin."],
+["Uzoq davom etgan chang bo‘roni","Havo filtrlari cheklangan. Suv va oziq-ovqatni tejash kerak."],
+["Noma’lum epidemiya","Tashqaridagi hududlar xavfli. Tibbiy bilim va toza suv muhim."],
+["Katta zilzila","Binolar qulagan, yo‘llar to‘silgan. Muhandislik ko‘nikmalari kerak."]
+];
+let state={people:[],cards:[],selected:null};
+const $=id=>document.getElementById(id);
+function pick(a){return a[Math.floor(Math.random()*a.length)]}
+function shuffle(a){return a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).map(x=>x[1])}
+function start(){
+ const n=+$("count").value, names=[$("nickname").value.trim()||"O‘yinchi 1"];
+ for(let i=2;i<=n;i++)names.push("O‘yinchi "+i);
+ state.people=names.map((name,i)=>({name,alive:true,cards:Object.keys(decks).map(kind=>({kind,value:pick(decks[kind]),revealed:false}))}));
+ state.selected=null;
+ const d=pick(disasters);$("disaster").textContent=d[0];$("scenario").textContent=d[1];
+ $("home").classList.add("hidden");$("rulesBox").classList.add("hidden");$("game").classList.remove("hidden");$("votePanel").classList.add("hidden");
+ renderPlayers();renderCards();window.scrollTo({top:0,behavior:"smooth"});
+}
+function renderPlayers(){$("players").innerHTML=state.people.map((p,i)=>`<div class="player"><strong>${esc(p.name)}</strong><span class="tag">${p.alive?"O‘yinda":"Chiqarilgan"}</span><div class="muted" style="font-size:12px;margin-top:5px">${p.cards.filter(c=>c.revealed).length}/4 karta ochilgan</div></div>`).join("")}
+function renderCards(){$("cards").innerHTML=state.people[0].cards.map((c,i)=>`<button class="card ${c.revealed?"revealed":""}" data-i="${i}"><span class="kind">${c.revealed?esc(c.kind):"YOPIQ KARTA"}</span><span class="value">${c.revealed?esc(c.value):"?"}</span><span class="hint">${c.revealed?"Ochilgan — qayta bosing":"Ochish uchun bosing"}</span></button>`).join("");$("cards").querySelectorAll("button").forEach(b=>b.onclick=()=>{let c=state.people[0].cards[+b.dataset.i];c.revealed=!c.revealed;renderCards();renderPlayers()})}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+$("start").onclick=start;$("restart").onclick=()=>{$("game").classList.add("hidden");$("home").classList.remove("hidden")};
+$("rules").onclick=()=>$("rulesBox").classList.toggle("hidden");$("closeRules").onclick=()=>$("rulesBox").classList.add("hidden");
+$("voteStart").onclick=()=>{$("votePanel").classList.remove("hidden");$("voteOptions").innerHTML=state.people.map((p,i)=>`<button class="vote" data-i="${i}">${esc(p.name)}</button>`).join("");$("voteOptions").querySelectorAll("button").forEach(b=>b.onclick=()=>{state.selected=+b.dataset.i;$("voteOptions").querySelectorAll("button").forEach(x=>x.classList.toggle("selected",x===b))});$("result").textContent="";$("votePanel").scrollIntoView({behavior:"smooth"})};
+$("submitVote").onclick=()=>{if(state.selected===null){$("result").textContent="Avval o‘yinchini tanlang.";return}const p=state.people[state.selected];$("result").innerHTML=`<div class="panel"><div class="status">DEMO NATIJASI</div><h2>${esc(p.name)}</h2><p>Bu demo ovozi. Haqiqiy o‘yinda barcha o‘yinchilarning ovozlari serverda jamlanadi.</p></div>`};
+</script>
+</body>
+</html>
