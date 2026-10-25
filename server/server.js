@@ -22,16 +22,50 @@ const rooms = {};
 function makeCode() {
   return Math.random().toString(36).slice(2, 8).toUpperCase();
 }
-
 const cardDeck = {
-  "Kasb": ["Shifokor", "Muhandis", "Oshpaz", "O‘qituvchi", "Dehqon", "Dasturchi"],
-  "Sog‘liq": ["Sog‘lom", "Astma", "Ko‘rish zaif", "Allergiya", "Kuchli immunitet"],
-  "Yosh": ["18 yosh", "25 yosh", "32 yosh", "41 yosh", "56 yosh", "67 yosh"],
-  "Xobbi": ["Ovchilik", "Bog‘dorchilik", "Birinchi yordam", "Ta’mirlash", "Suzish"],
-  "Yuk": ["Asboblar to‘plami", "Dori qutisi", "Urug‘lar", "Radio", "Hech narsa"],
-  "Sir": ["Suv manbasini biladi", "Yashirin qo‘rquvi bor", "Omon qolish tajribasi bor", "Hech kimga aytmagan siri bor"]
+  "Kasb": [
+    "Shifokor", "Muhandis", "Oshpaz", "O‘qituvchi", "Dehqon",
+    "Dasturchi", "Elektrik", "Quruvchi", "Haydovchi", "Mexanik",
+    "Veterinar", "Qutqaruvchi", "Harbiy", "Tikuvchi", "Duradgor",
+    "Bog‘bon", "Kimyogar", "Biolog", "Geolog", "Uchuvchi",
+    "Dengizchi", "Sartarosh", "Payvandchi", "Arxitektor", "Rassom",
+    "Fotograf", "Jurnalist", "Tarjimon", "Psixolog", "Feldsher"
+  ],
+  "Sog‘liq": [
+    "Sog‘lom", "Astma", "Ko‘rish zaif", "Allergiya",
+    "Kuchli immunitet", "Eshitish zaif", "Tez charchaydi",
+    "Jismonan baquvvat", "Uyqusizlik", "Yaxshi ko‘radi",
+    "Surunkali bel og‘rig‘i", "Stressga chidamli",
+    "Tez yugura oladi", "Qo‘li jarohatlangan", "Qon guruhi noyob"
+  ],
+  "Yosh": [
+    "18 yosh", "21 yosh", "25 yosh", "29 yosh", "32 yosh",
+    "36 yosh", "41 yosh", "45 yosh", "50 yosh", "56 yosh",
+    "61 yosh", "67 yosh", "72 yosh", "78 yosh", "85 yosh"
+  ],
+  "Xobbi": [
+    "Ovchilik", "Bog‘dorchilik", "Birinchi yordam",
+    "Ta’mirlash", "Suzish", "Baliq ovlash", "Kitob o‘qish",
+    "Ovqat tayyorlash", "Yulduzlarni kuzatish", "Tikuvchilik",
+    "Yog‘och o‘ymakorligi", "Shaxmat", "Chorvachilik",
+    "Xarita tuzish", "Rasm chizish"
+  ],
+  "Yuk": [
+    "Asboblar to‘plami", "Dori qutisi", "Urug‘lar",
+    "Radio", "Hech narsa", "Arqon", "Pichoq",
+    "Filtrli suv idishi", "Chiroq", "Batareyalar",
+    "Konserva", "Issiq kiyim", "Kompas", "Palatka",
+    "Tikuv anjomlari", "Kitob", "Walkie-talkie",
+    "Baliq ovlash anjomlari", "Gaz niqobi", "Fonarik"
+  ],
+  "Sir": [
+    "Suv manbasini biladi", "Yashirin qo‘rquvi bor",
+    "Omon qolish tajribasi bor", "Hech kimga aytmagan siri bor",
+    "Boshpananing xaritasini topgan", "Oldin yolg‘iz yashagan",
+    "Muhim ma’lumotni yashiradi", "Boshqa guruhni taniydi",
+    "Yashirin zaxirasi bor", "Kutilmagan qobiliyati bor"
+  ]
 };
-
 function shuffled(items) {
   const copy = [...items];
   for (let i = copy.length - 1; i > 0; i--) {
