@@ -119,6 +119,38 @@ socket.on("playersUpdated", (players) => {
     "Xonadagi o‘yinchilar (" + players.length + "): " +
     players.map(p => p.name).join(", ");
 });
+socket.on("privateCards", (cards) => {
+  let area = document.getElementById("myCards");
+
+  if (!area) {
+    area = document.createElement("section");
+    area.id = "myCards";
+    area.className = "panel";
+    document.querySelector("main").appendChild(area);
+  }
+
+  area.innerHTML = "<h2>🎴 Mening kartalarim</h2>";
+
+  for (const [type, value] of Object.entries(cards)) {
+    const card = document.createElement("div");
+    card.className = "panel";
+    card.style.margin = "10px 0";
+    card.innerHTML = "";
+
+    const heading = document.createElement("h3");
+    heading.textContent = type;
+
+    const detail = document.createElement("p");
+    detail.textContent = value;
+
+    card.append(heading, detail);
+    area.appendChild(card);
+  }
+});
+
+socket.on("gameStarted", (data) => {
+  $("roomMessage").textContent = data.message || "O‘yin boshlandi!";
+});
 </script>
 </body>
 </html>
