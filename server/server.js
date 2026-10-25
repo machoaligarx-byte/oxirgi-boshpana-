@@ -66,6 +66,82 @@ const cardDeck = {
     "Yashirin zaxirasi bor", "Kutilmagan qobiliyati bor"
   ]
 };
+
+const cardModifiers = {
+  "Kasb": [
+    "tajribali", "yosh mutaxassis", "usta", "sobiq mutaxassis",
+    "tezkor", "ixtirochi", "puxta bilimli", "amaliy tajribali",
+    "qiyin vaziyatga moslashgan", "jamoada ishlaydigan",
+    "mustaqil ishlaydigan", "kam uchraydigan mutaxassislik",
+    "ko‘p tilli", "dala sharoitida ishlagan", "rahbarlik tajribali",
+    "shogird tayyorlagan", "eski usullarni biladi",
+    "zamonaviy texnikani biladi", "ta’mirlashga usta",
+    "muammolarni tez hal qiladi"
+  ],
+  "Sog‘liq": [
+    "yengil darajada", "o‘rtacha darajada", "yaxshi nazorat qilinadi",
+    "vaqti-vaqti bilan bezovta qiladi", "jismoniy faol",
+    "tez tiklanadi", "sovuqqa chidamli", "issiqqa chidamli",
+    "doimiy kuzatuv talab qiladi", "maxsus parvarish talab qiladi",
+    "harakatlanishga ta’sir qiladi", "uyquga ta’sir qiladi",
+    "stressda kuchayadi", "dori bilan nazorat qilinadi",
+    "uzoq yurishda bilinadi", "vaqtinchalik holat",
+    "yaxshi immunitet", "chidamliligi yuqori",
+    "chidamliligi past", "alohida ehtiyotkorlik kerak"
+  ],
+  "Yosh": [
+    "jismonan baquvvat", "katta hayotiy tajribali",
+    "tez o‘rganuvchi", "chidamli", "ehtiyotkor",
+    "faol", "kuzatuvchan", "mustaqil",
+    "jamoaviy ishlashni yoqtiradi", "rejalashtirishga usta"
+  ],
+  "Xobbi": [
+    "bolaligidan shug‘ullanadi", "professional darajada",
+    "mustaqil o‘rgangan", "jamoa bilan bajaradi",
+    "maxsus asboblari bor", "boshqalarga o‘rgata oladi",
+    "dala sharoitida foydali", "kam uchraydigan mashg‘ulot",
+    "ko‘p yillik tajribaga ega", "yangi boshlagan",
+    "tez o‘rganadi", "ijodiy yondashadi",
+    "amaliy foyda keltiradi", "sabr talab qiladi",
+    "aniqlik talab qiladi", "xavfsizlikni yaxshi biladi"
+  ],
+  "Yuk": [
+    "yangi", "eski, ammo ishlaydi", "mustahkamlangan",
+    "ixcham", "og‘ir", "yengil", "zaxira nusxasi",
+    "suv o‘tkazmaydigan qadoqda", "ta’mirlangan",
+    "qo‘lda yasalgan", "cheklangan miqdorda",
+    "uzoq muddat saqlanadi", "batareyasi bor",
+    "qo‘shimcha qismlari bor", "maxsus himoya qopida"
+  ],
+  "Sir": [
+    "faqat bir kishiga aytgan", "eski voqea bilan bog‘liq",
+    "jamoaga foyda keltirishi mumkin", "xavfli ma’lumot",
+    "hali tekshirilmagan", "kutilmagan oqibatga ega",
+    "boshqa o‘yinchiga aloqador", "vaqt o‘tishi bilan ochiladi",
+    "ishonch talab qiladi", "muhim qarorga ta’sir qiladi",
+    "yashirin dalilga ega", "sirli xabar bilan bog‘liq",
+    "ikki xil talqin qilinadi", "jamoani ajratishi mumkin",
+    "kelishuvga yordam berishi mumkin"
+  ]
+};
+
+for (const category of Object.keys(cardDeck)) {
+  const baseCards = [...cardDeck[category]];
+  const modifiers = cardModifiers[category] || [];
+
+  const expandedCards = baseCards.flatMap(card => [
+    card,
+    ...modifiers.map(modifier => `${card} — ${modifier}`)
+  ]);
+
+  cardDeck[category] = [...new Set(expandedCards)];
+}
+
+const totalCards = Object.values(cardDeck)
+  .reduce((sum, cards) => sum + cards.length, 0);
+
+console.log("Jami noyob karta variantlari:", totalCards);
+
 function shuffled(items) {
   const copy = [...items];
   for (let i = copy.length - 1; i > 0; i--) {
