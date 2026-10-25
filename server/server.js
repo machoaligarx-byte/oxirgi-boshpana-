@@ -222,6 +222,7 @@ io.on("connection", socket => {
     sendPlayers(code);
   });
 
+  
   socket.on("startGame", (code, callback) => {
     code = String(code || "").trim().toUpperCase();
     const room = rooms[code];
@@ -251,15 +252,16 @@ io.on("connection", socket => {
     }
 
     room.started = true;
+    room.playerCards = {};
 
     for (const player of room.players) {
       const cards = {};
 
       for (const [category, options] of Object.entries(cardDeck)) {
-        cards[category] =
-          shuffled(options)[0];
+        cards[category] = shuffled(options)[0];
       }
 
+      room.playerCards[player.id] = cards;
       io.to(player.id).emit("privateCards", cards);
     }
 
@@ -271,6 +273,7 @@ io.on("connection", socket => {
     if (typeof callback === "function")
       callback({ ok: true });
   });
+
 
   socket.on("disconnect", () => {
     for (const [code, room] of Object.entries(rooms)) {
