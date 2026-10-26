@@ -274,6 +274,71 @@ io.on("connection", socket => {
   });
 
 
+  socket.on("revealCard", ({ code, category } = {}, callback) => {
+    code = String(code || "").trim().toUpperCase();
+    const room = rooms[code];
+
+    if (!room || !room.started) {
+      if (typeof callback === "function")
+        callback({ ok: false, error: "O‘yin topilmadi" });
+      return;
+    }
+
+    const player = room.players.find(p => p.id === socket.id);
+    const cards = room.playerCards?.[socket.id];
+
+    if (!player || !cards || !Object.prototype.hasOwnProperty.call(cards, category)) {
+      if (typeof callback === "function")
+        callback({ ok: false, error: "Karta topilmadi" });
+      return;
+    }
+
+    room.revealedCards = room.revealedCards || {};
+    room.revealedCards[socket.id] = room.revealedCards[socket.id] || [];
+
+    if (!room.revealedCards[socket.id].includes(category)) {
+      room.revealedCards[socket.id].push(category);
+    }
+
+    io.to(code).emit("cardRevealed", {
+      playerName: player.name,
+      category,
+      value: cards[category]
+    });
+
+    if (typeof callback === "function")
+      callback({ ok: true });
+  });
+
+  socket.on("startVoting", (code, callback) => {
+    code = String(code || "").trim().toUpperCase();
+    const room = rooms[code];
+
+    if (!room || !room.started) {
+      if (typeof callback === "function")
+        callback({ ok: false, error: "O‘yin topilmadi" });
+      return;
+    }
+
+    if (room.host !== socket.id) {
+      if (typeof callback === "function")
+        callback({ ok: false, error: "Faqat boshlovchi ovoz berishni boshlaydi" });
+      return;
+    }
+
+    room.voting = {
+      active: true,
+      votes: {}
+    };
+
+    io.to(code).emit("votingStarted", {
+      players: room.players.map(p => ({ name: p.name }))
+    });
+
+    if (typeof callback === "function")
+      callback({ ok: true });
+  });
+
   socket.on("disconnect", () => {
     for (const [code, room] of Object.entries(rooms)) {
       room.players = room.players.filter(p => p.id !== socket.id);
