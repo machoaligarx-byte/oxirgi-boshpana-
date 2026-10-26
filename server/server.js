@@ -260,9 +260,6 @@ io.on("connection", socket => {
       for (const [category, options] of Object.entries(cardDeck)) {
         cards[category] = shuffled(options)[0];
       }
-cards["Qo‘shimcha kartalar"] = shuffled(
-  Object.values(cardDeck).flat()
-).slice(0, 4);
       room.playerCards[player.id] = cards;
       io.to(player.id).emit("privateCards", cards);
     }
