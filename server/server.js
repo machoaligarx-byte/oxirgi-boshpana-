@@ -22,6 +22,7 @@ const rooms = {};
 function makeCode() {
   return Math.random().toString(36).slice(2, 8).toUpperCase();
 }
+
 const cardDeck = {
   "Kasb": [
     "Shifokor", "Muhandis", "Oshpaz", "O‘qituvchi", "Dehqon",
@@ -125,6 +126,7 @@ const cardModifiers = {
   ]
 };
 
+// Kartalar uchun noyob variantlarni yaratish.
 for (const category of Object.keys(cardDeck)) {
   const baseCards = [...cardDeck[category]];
   const modifiers = cardModifiers[category] || [];
@@ -137,23 +139,30 @@ for (const category of Object.keys(cardDeck)) {
   cardDeck[category] = [...new Set(expandedCards)];
 }
 
-const totalCards = Object.values(cardDeck)
-  .reduce((sum, cards) => sum + cards.length, 0);
-
-console.log("Jami noyob karta variantlari:", totalCards);
+console.log(
+  "Jami noyob karta variantlari:",
+  Object.values(cardDeck).reduce((sum, cards) => sum + cards.length, 0)
+);
 
 function shuffled(items) {
   const copy = [...items];
+
   for (let i = copy.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [copy[i], copy[j]] = [copy[j], copy[i]];
   }
+
   return copy;
+}
+
+function reply(callback, result) {
+  if (typeof callback === "function") callback(result);
 }
 
 function sendPlayers(code) {
   const room = rooms[code];
   if (!room) return;
+
   io.to(code).emit(
     "playersUpdated",
     room.players.map(p => ({ name: p.name }))
@@ -161,6 +170,7 @@ function sendPlayers(code) {
 }
 
 io.on("connection", socket => {
+  // Xona yaratish.
   socket.on("createRoom", (playerName, callback) => {
     let code = makeCode();
     while (rooms[code]) code = makeCode();
@@ -171,41 +181,42 @@ io.on("connection", socket => {
       players: [{
         id: socket.id,
         name: String(playerName || "O‘yinchi").slice(0, 24)
-      }]
+      }],
+      playerCards: {},
+      revealedCards: {},
+      voting: null
     };
 
     socket.join(code);
-    if (typeof callback === "function") {
-      callback({ ok: true, code });
-    }
+    reply(callback, { ok: true, code });
     sendPlayers(code);
   });
 
+  // Xonaga qo‘shilish.
   socket.on("joinRoom", ({ code, name } = {}, callback) => {
     code = String(code || "").trim().toUpperCase();
     const room = rooms[code];
 
     if (!room) {
-      if (typeof callback === "function")
-        callback({ ok: false, error: "Xona topilmadi" });
+      reply(callback, { ok: false, error: "Xona topilmadi" });
       return;
     }
 
     if (room.started) {
-      if (typeof callback === "function")
-        callback({ ok: false, error: "O‘yin allaqachon boshlangan" });
+      reply(callback, {
+        ok: false,
+        error: "O‘yin allaqachon boshlangan"
+      });
       return;
     }
 
     if (room.players.length >= 8) {
-      if (typeof callback === "function")
-        callback({ ok: false, error: "Xona to‘la" });
+      reply(callback, { ok: false, error: "Xona to‘la" });
       return;
     }
 
     if (room.players.some(p => p.id === socket.id)) {
-      if (typeof callback === "function")
-        callback({ ok: true, code });
+      reply(callback, { ok: true, code });
       return;
     }
 
@@ -215,51 +226,54 @@ io.on("connection", socket => {
     });
 
     socket.join(code);
-
-    if (typeof callback === "function")
-      callback({ ok: true, code });
-
+    reply(callback, { ok: true, code });
     sendPlayers(code);
   });
 
-  
+  // O‘yinni faqat xona egasi boshlaydi.
   socket.on("startGame", (code, callback) => {
     code = String(code || "").trim().toUpperCase();
     const room = rooms[code];
 
     if (!room) {
-      if (typeof callback === "function")
-        callback({ ok: false, error: "Xona topilmadi" });
+      reply(callback, { ok: false, error: "Xona topilmadi" });
       return;
     }
 
     if (room.host !== socket.id) {
-      if (typeof callback === "function")
-        callback({ ok: false, error: "Faqat xona egasi boshlashi mumkin" });
+      reply(callback, {
+        ok: false,
+        error: "Faqat xona egasi boshlashi mumkin"
+      });
       return;
     }
 
     if (room.started) {
-      if (typeof callback === "function")
-        callback({ ok: false, error: "O‘yin boshlangan" });
+      reply(callback, { ok: false, error: "O‘yin boshlangan" });
       return;
     }
 
     if (room.players.length < 2) {
-      if (typeof callback === "function")
-        callback({ ok: false, error: "Kamida 2 o‘yinchi kerak" });
+      reply(callback, {
+        ok: false,
+        error: "Kamida 2 o‘yinchi kerak"
+      });
       return;
     }
 
     room.started = true;
     room.playerCards = {};
+    room.revealedCards = {};
+    room.voting = null;
 
     for (const player of room.players) {
       const cards = {};
 
+      // Har bir o‘yinchiga 6 ta maxfiy karta.
       for (const [category, options] of Object.entries(cardDeck)) {
         cards[category] = shuffled(options)[0];
       }
+
       room.playerCards[player.id] = cards;
       io.to(player.id).emit("privateCards", cards);
     }
@@ -269,32 +283,30 @@ io.on("connection", socket => {
       players: room.players.map(p => ({ name: p.name }))
     });
 
-    if (typeof callback === "function")
-      callback({ ok: true });
+    reply(callback, { ok: true });
   });
 
-
+  // O‘yinchi o‘z kartasini istalgan payt ochishi mumkin.
   socket.on("revealCard", ({ code, category } = {}, callback) => {
     code = String(code || "").trim().toUpperCase();
     const room = rooms[code];
 
     if (!room || !room.started) {
-      if (typeof callback === "function")
-        callback({ ok: false, error: "O‘yin topilmadi" });
+      reply(callback, { ok: false, error: "O‘yin topilmadi" });
       return;
     }
 
     const player = room.players.find(p => p.id === socket.id);
-    const cards = room.playerCards?.[socket.id];
+    const cards = room.playerCards[socket.id];
 
-    if (!player || !cards || !Object.prototype.hasOwnProperty.call(cards, category)) {
-      if (typeof callback === "function")
-        callback({ ok: false, error: "Karta topilmadi" });
+    if (!player || !cards ||
+        !Object.prototype.hasOwnProperty.call(cards, category)) {
+      reply(callback, { ok: false, error: "Karta topilmadi" });
       return;
     }
 
-    room.revealedCards = room.revealedCards || {};
-    room.revealedCards[socket.id] = room.revealedCards[socket.id] || [];
+    room.revealedCards[socket.id] =
+      room.revealedCards[socket.id] || [];
 
     if (!room.revealedCards[socket.id].includes(category)) {
       room.revealedCards[socket.id].push(category);
@@ -306,51 +318,195 @@ io.on("connection", socket => {
       value: cards[category]
     });
 
-    if (typeof callback === "function")
-      callback({ ok: true });
+    reply(callback, { ok: true });
   });
 
+  // Ovoz berishni faqat xona egasi boshlaydi.
   socket.on("startVoting", (code, callback) => {
     code = String(code || "").trim().toUpperCase();
     const room = rooms[code];
 
     if (!room || !room.started) {
-      if (typeof callback === "function")
-        callback({ ok: false, error: "O‘yin topilmadi" });
+      reply(callback, { ok: false, error: "O‘yin topilmadi" });
       return;
     }
 
     if (room.host !== socket.id) {
-      if (typeof callback === "function")
-        callback({ ok: false, error: "Faqat boshlovchi ovoz berishni boshlaydi" });
+      reply(callback, {
+        ok: false,
+        error: "Faqat boshlovchi ovoz berishni boshlaydi"
+      });
       return;
     }
 
-    room.voting = {
-      active: true,
-      votes: {}
-    };
+    if (room.players.length <= 2) {
+      reply(callback, {
+        ok: false,
+        error: "O‘yin tugagan: boshpanada 2 kishi qoldi."
+      });
+      return;
+    }
+
+    if (room.voting?.active) {
+      reply(callback, {
+        ok: false,
+        error: "Ovoz berish allaqachon boshlangan"
+      });
+      return;
+    }
+
+    room.voting = { active: true, votes: {} };
 
     io.to(code).emit("votingStarted", {
-      players: room.players.map(p => ({ name: p.name }))
+      players: room.players.map(p => ({
+        id: p.id,
+        name: p.name
+      }))
     });
 
-    if (typeof callback === "function")
-      callback({ ok: true });
+    reply(callback, { ok: true });
   });
 
+  // Ovoz berish: har bir o‘yinchi bir marta ovoz beradi.
+  socket.on("castVote", (data, callback) => {
+    const code = String(data?.code || "").trim().toUpperCase();
+    const targetId = String(data?.targetId || "");
+    const room = rooms[code];
+
+    if (!room || !room.voting?.active) {
+      reply(callback, {
+        ok: false,
+        error: "Ovoz berish faol emas."
+      });
+      return;
+    }
+
+    if (!room.players.some(p => p.id === socket.id)) {
+      reply(callback, { ok: false, error: "Siz bu xonada emassiz." });
+      return;
+    }
+
+    if (room.players.length <= 2) {
+      room.voting.active = false;
+      reply(callback, {
+        ok: false,
+        error: "O‘yin tugagan: 2 kishi qoldi."
+      });
+      return;
+    }
+
+    if (!room.players.some(p => p.id === targetId)) {
+      reply(callback, { ok: false, error: "O‘yinchi topilmadi." });
+      return;
+    }
+
+    if (socket.id === targetId) {
+      reply(callback, {
+        ok: false,
+        error: "O‘zingizga ovoz bera olmaysiz."
+      });
+      return;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(room.voting.votes, socket.id)) {
+      reply(callback, {
+        ok: false,
+        error: "Siz allaqachon ovoz bergansiz."
+      });
+      return;
+    }
+
+    room.voting.votes[socket.id] = targetId;
+    reply(callback, { ok: true });
+
+    const votedCount = Object.keys(room.voting.votes).length;
+
+    io.to(code).emit("voteProgress", {
+      voted: votedCount,
+      total: room.players.length
+    });
+
+    if (votedCount !== room.players.length) return;
+
+    const counts = {};
+
+    for (const id of Object.values(room.voting.votes)) {
+      counts[id] = (counts[id] || 0) + 1;
+    }
+
+    const maxVotes = Math.max(...Object.values(counts));
+    const tiedIds = Object.keys(counts).filter(
+      id => counts[id] === maxVotes
+    );
+
+    // Teng ovoz bo‘lsa, eng ko‘p ovoz olganlar orasidan bittasi tasodifiy tanlanadi.
+    const eliminatedId =
+      tiedIds[Math.floor(Math.random() * tiedIds.length)];
+
+    const eliminated = room.players
+      .filter(p => p.id === eliminatedId)
+      .map(p => ({ id: p.id, name: p.name }));
+
+    room.players = room.players.filter(p => p.id !== eliminatedId);
+    room.voting.active = false;
+
+    // Xona egasi chiqarilsa, yangi egani tayinlash.
+    if (room.host === eliminatedId && room.players.length > 0) {
+      room.host = room.players[0].id;
+    }
+
+    io.to(code).emit("votingResult", {
+      eliminated,
+      remaining: room.players.map(p => ({
+        id: p.id,
+        name: p.name
+      })),
+      finished: room.players.length === 2,
+      draw: false,
+      message: room.players.length === 2
+        ? "O‘yin tugadi! Boshpanada aynan 2 kishi qoldi."
+        : tiedIds.length > 1
+          ? "Ovozlar teng bo‘ldi. Tasodifiy tanlov orqali bitta o‘yinchi chiqarildi."
+          : "Ovoz berish tugadi."
+    });
+
+    sendPlayers(code);
+  });
+
+  // O‘yinchi uzilib qolsa, xonani yangilash.
   socket.on("disconnect", () => {
     for (const [code, room] of Object.entries(rooms)) {
+      const wasHost = room.host === socket.id;
+
       room.players = room.players.filter(p => p.id !== socket.id);
+      delete room.playerCards[socket.id];
+      delete room.revealedCards[socket.id];
+
+      if (room.voting?.votes) {
+        delete room.voting.votes[socket.id];
+      }
 
       if (room.players.length === 0) {
         delete rooms[code];
-      } else {
-        if (room.host === socket.id) {
-          room.host = room.players[0].id;
-        }
-        sendPlayers(code);
+        continue;
       }
+
+      if (wasHost) {
+        room.host = room.players[0].id;
+      }
+
+      // Ulanish uzilganda qolgan o‘yinchilar uchun ovoz holatini qayta boshlash.
+      if (room.voting?.active) {
+        room.voting.votes = {};
+        io.to(code).emit("votingStarted", {
+          players: room.players.map(p => ({
+            id: p.id,
+            name: p.name
+          }))
+        });
+      }
+
+      sendPlayers(code);
     }
   });
 });
