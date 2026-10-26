@@ -1,166 +1,273 @@
 <!doctype html>
 <html lang="uz">
-<head><script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+<head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#101813">
-<title>Oxirgi Boshpana — prototip</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101827">
+<title>Oxirgi Boshpana — Onlayn o‘yin</title>
 <style>
-:root{--bg:#101813;--panel:#1b2820;--panel2:#24352a;--text:#f3f2e9;--muted:#b6c3b8;--accent:#d9b76d;--red:#df7770;--green:#8ed0a1}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#26392b 0,#101813 60%);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;min-height:100vh}
-main{max-width:760px;margin:auto;padding:18px 14px 42px}.top{display:flex;align-items:center;gap:12px;margin-bottom:18px}.logo{font-size:34px}.eyebrow{color:var(--accent);font-size:12px;letter-spacing:2px;font-weight:800}.title{font-size:25px;font-weight:900;line-height:1.1}.sub{color:var(--muted);font-size:13px;margin-top:5px}
-.panel{background:rgba(27,40,32,.96);border:1px solid #3b5140;border-radius:18px;padding:16px;margin:12px 0;box-shadow:0 12px 30px #0002}
-h2{font-size:18px;margin:0 0 10px}p{line-height:1.45}.muted{color:var(--muted)}label{display:block;font-size:13px;color:var(--muted);margin:12px 0 5px}input,select{width:100%;padding:13px;border-radius:11px;border:1px solid #526656;background:#111b14;color:var(--text);font-size:16px}
-button{border:0;border-radius:12px;background:var(--accent);color:#1c2118;font-size:15px;font-weight:800;padding:13px 15px;cursor:pointer}button.secondary{background:#34483a;color:var(--text);border:1px solid #526656}button.danger{background:#653b37;color:#fff}button:disabled{opacity:.45;cursor:not-allowed}.row{display:flex;gap:8px;flex-wrap:wrap}.row>*{flex:1}.hidden{display:none!important}.notice{font-size:12px;color:var(--muted);border-left:3px solid var(--accent);padding-left:10px;margin-top:12px}.players{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:9px}.player{border:1px solid #405544;background:#17231a;border-radius:13px;padding:12px}.player strong{display:block;margin-bottom:5px}.tag{display:inline-block;font-size:11px;border-radius:99px;padding:4px 8px;background:#334737;color:#dce9dd;margin:2px 3px 2px 0}.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.card{min-height:135px;border:1px solid #61704d;background:linear-gradient(145deg,#344b36,#1a281e);border-radius:14px;padding:13px;text-align:left;color:var(--text);display:flex;flex-direction:column;justify-content:space-between}.card .kind{font-size:11px;color:var(--accent);font-weight:900;letter-spacing:1px}.card .value{font-size:18px;font-weight:850;margin:10px 0}.card .hint{font-size:12px;color:var(--muted)}.card.revealed{background:linear-gradient(145deg,#3c4933,#26372a);border-color:var(--accent)}.vote{width:100%;text-align:left;background:#26392b;color:var(--text);border:1px solid #4b604d;margin:5px 0}.vote.selected{outline:2px solid var(--accent)}.status{font-size:12px;color:var(--green);font-weight:700}.footer{font-size:11px;color:#8f9e91;text-align:center;margin-top:22px}
-@media(min-width:600px){main{padding-top:28px}.title{font-size:32px}.cards{grid-template-columns:repeat(3,minmax(0,1fr))}}
+:root{color-scheme:dark;--bg:#0b1220;--panel:#151f31;--panel2:#1b2940;--line:#2d3c55;--text:#edf3ff;--muted:#a8b5ca;--accent:#73e0b1;--danger:#ff7d89;--gold:#ffd782}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#1c2d47 0,#0b1220 55%);color:var(--text);font:16px/1.45 system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
+header{padding:22px 16px 12px;text-align:center}header h1{margin:0;font-size:clamp(26px,6vw,42px);letter-spacing:.4px}header p{margin:8px 0 0;color:var(--muted)}
+main{width:min(1100px,100%);margin:auto;padding:12px;display:grid;gap:14px}.panel{background:linear-gradient(160deg,#19263b,#121b2b);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 10px 28px #0002}
+h2,h3{margin:0 0 12px}h2{font-size:20px}h3{font-size:16px;color:var(--accent)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.row>*{flex:1 1 130px}
+input,button,textarea{font:inherit;border-radius:12px;border:1px solid var(--line);padding:12px;background:#0d1727;color:var(--text);min-width:0}
+button{cursor:pointer;font-weight:700;background:var(--accent);color:#10251e;border:0}button.secondary{background:#263751;color:var(--text);border:1px solid #405574}button.danger{background:#562b3a;color:#ffe8ec;border:1px solid #884653}button:disabled{opacity:.45;cursor:not-allowed}
+.small{font-size:13px;color:var(--muted)}.hidden{display:none!important}.status{padding:10px 12px;border-radius:12px;background:#102d2a;color:#b8ffdf;margin:10px 0}.error{background:#40202a;color:#ffd6dd}.columns{display:grid;grid-template-columns:1fr;gap:14px}@media(min-width:780px){.columns{grid-template-columns:1fr 1fr}}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px}.card{background:#0e1929;border:1px solid #31435f;border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px}.card strong{color:var(--gold)}.card p{margin:0;overflow-wrap:anywhere}.card button{margin-top:auto;padding:9px;font-size:14px}.players{display:grid;gap:8px}.player{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:10px;border-radius:12px;background:#0e1929;border:1px solid #293a53}.tag{font-size:12px;color:#12271f;background:var(--accent);padding:3px 7px;border-radius:20px}.chatlog{height:220px;overflow:auto;display:flex;flex-direction:column;gap:8px;padding:10px;background:#0d1727;border:1px solid var(--line);border-radius:12px}.chatline{overflow-wrap:anywhere}.chatline b{color:var(--accent)}.feed{display:flex;flex-direction:column;gap:8px;max-height:250px;overflow:auto}.feed article{background:#0d1727;padding:10px;border-radius:10px;border:1px solid #263750}.feed article b{color:var(--gold)}footer{text-align:center;padding:24px;color:var(--muted);font-size:12px}
 </style>
 </head>
 <body>
+<header><h1>🏚️ Oxirgi Boshpana</h1><p>Omon qolish, sirlar va jamoaviy qarorlar</p></header>
 <main>
-  <header class="top"><div class="logo">☢️</div><div><div class="eyebrow">SURVIVAL PARTY GAME</div><div class="title">OXIRGI BOSHPANA</div><div class="sub">O‘zbekcha karta o‘yini · Dastlabki prototip</div></div></header>
-  <section id="home" class="panel">
-    <div class="panel">
-  <h2>Onlayn o‘yin</h2>
-  <button id="createRoom">Xona yaratish</button>
-  <button id="startGame">O‘yinni boshlash</button>
-      <p id="roomMessage">Do‘stlaring bilan o‘ynash uchun xona yarat.</p>
-  <label for="roomCode">Xona kodi</label>
-  <input id="roomCode" placeholder="Masalan: AB12CD">
-  <button id="joinRoom">Xonaga qo‘shilish</button>
-    </div>
-    <h2>Boshpana hali ochiq</h2>
-    <p class="muted">Falokatdan keyin hamma omon qololmaydi. O‘z kartalaringni och, boshqalarning dalillarini tingla va kim boshpanada qolishini tanla.</p>
-    <label for="nickname">O‘yinchi nomi</label><input id="nickname" maxlength="20" placeholder="Masalan: Sardor" value="O‘yinchi 1">
-    <label for="count">Demo o‘yinchilar soni</label><select id="count"><option value="3">3 o‘yinchi</option><option value="4" selected>4 o‘yinchi</option><option value="5">5 o‘yinchi</option><option value="6">6 o‘yinchi</option><option value="7">7 o‘yinchi</option><option value="8">8 o‘yinchi</option></select>
-    <div class="row" style="margin-top:14px"><button id="start">Demo o‘yinni boshlash</button><button id="rules" class="secondary">Qoidalar</button></div>
-    <div class="notice">Bu hozircha bitta telefonda sinash uchun demo. Internet multiplayer va haqiqiy xona kodlari keyingi bosqichda serverga ulanadi.</div>
+  <section class="panel" id="entryPanel">
+    <h2>Onlayn xonaga kirish</h2>
+    <label class="small" for="name">O‘yinchi ismi</label>
+    <div class="row"><input id="name" maxlength="24" placeholder="Ismingiz" autocomplete="nickname"><button id="createBtn">Xona yaratish</button></div>
+    <div style="height:10px"></div>
+    <label class="small" for="roomCode">Xona kodi</label>
+    <div class="row"><input id="roomCode" maxlength="8" placeholder="Masalan: AB12CD" autocapitalize="characters"><button id="joinBtn" class="secondary">Xonaga qo‘shilish</button></div>
+    <div id="connectionStatus" class="status">Serverga ulanmoqda…</div>
+    <p class="small">Bir xonada 2–8 o‘yinchi qatnashishi mumkin. Barcha o‘yinchilar bir xil xona kodidan foydalanadi.</p>
   </section>
-  <section id="rulesBox" class="panel hidden"><h2>Qoidalar</h2><p>1. Har bir o‘yinchiga tasodifiy kartalar beriladi.</p><p>2. Kartalarni bosib, birma-bir oching.</p><p>3. O‘yinchilar o‘zini boshpanada qolishga munosib ekanini tushuntiradi.</p><p>4. Ovoz berish bosqichida bitta o‘yinchini tanlang. Demo yakunda natijani ko‘rsatadi.</p><button id="closeRules" class="secondary">Yopish</button></section>
-  <section id="game" class="hidden">
-    <section class="panel"><div class="eyebrow">VAZIYAT</div><h2 id="disaster">Global falokat</h2><p id="scenario" class="muted"></p><div class="row"><div><span class="tag">Boshpana sig‘imi: 3 kishi</span></div><div><span class="tag" id="roundTag">1-raund</span></div></div></section>
-    <section class="panel"><h2>O‘yinchilar</h2><div id="players" class="players"></div></section>
-    <section class="panel"><h2 id="cardHeading">Kartalaringizni oching</h2><p class="muted">Demo uchun kartalarni navbat bilan ochish mumkin. Haqiqiy yashirin kartalar multiplayerda server orqali boshqariladi.</p><div id="cards" class="cards"></div><div class="row" style="margin-top:14px"><button id="voteStart">Ovoz berishga o‘tish</button><button id="restart" class="secondary">Qayta boshlash</button></div></section>
-    <section id="votePanel" class="panel hidden"><h2>Kim boshpanada qolmasin?</h2><p class="muted">Bitta o‘yinchini tanlang va ovozni yuboring.</p><div id="voteOptions"></div><button id="submitVote" style="width:100%;margin-top:10px">Ovoz berish natijasini ko‘rish</button><div id="result" style="margin-top:14px"></div></section>
+
+  <section class="panel hidden" id="roomPanel">
+    <div class="row"><div><h2>Xona: <span id="roomCodeLabel"></span></h2><p class="small" id="hostNote">Xona tayyorlanmoqda</p></div><button id="copyCodeBtn" class="secondary">Kodni nusxalash</button></div>
+    <h3>O‘yinchilar <span id="playerCount"></span></h3><div id="players" class="players"></div>
+    <div class="row" style="margin-top:12px"><button id="startGameBtn">O‘yinni boshlash</button><button id="startVotingBtn" class="danger" disabled>Ovoz berishni boshlash</button></div>
+    <p class="small">Faqat xona egasi o‘yinni va ovoz berishni boshlay oladi.</p>
   </section>
-  <section id="onlineGame" class="panel hidden">
-  <h2>🎴 Onlayn o‘yin — mening kartalarim</h2>
-  <div id="onlineCards"></div>
-</section>
-  <div class="footer">Prototip 0.1 · Original loyiha · “Bunker” nomi yoki materiallarini ko‘chirmaydi</div>
+
+  <section class="panel hidden" id="gamePanel">
+    <div class="row"><div><h2>🎴 Mening kartalarim</h2><p class="small">Har bir kartani istagan paytingiz ochishingiz mumkin. Ochilgan karta hamma o‘yinchiga ko‘rinadi.</p></div><span class="tag" id="gameBadge">O‘yin davom etmoqda</span></div>
+    <div id="myCards" class="cards"></div>
+  </section>
+
+  <section class="columns hidden" id="liveColumns">
+    <section class="panel"><h2>📣 Ochilgan kartalar</h2><div id="revealedFeed" class="feed"><p class="small">Hali karta ochilmadi.</p></div></section>
+    <section class="panel"><h2>🗳️ Ovoz berish</h2><div id="voteStatus" class="status">Boshlovchi ovoz berishni boshlashini kuting.</div><div id="votePlayers" class="players"></div></section>
+  </section>
+
+  <section class="panel hidden" id="chatPanel">
+    <h2>💬 Onlayn chat</h2><div id="chatLog" class="chatlog" aria-live="polite"></div>
+    <form id="chatForm" class="row" style="margin-top:10px"><input id="chatInput" maxlength="500" placeholder="Xabar yozing…" autocomplete="off"><button>Yuborish</button></form>
+  </section>
+  <section class="panel hidden" id="resultPanel"><h2>🏆 O‘yin natijasi</h2><div id="resultText"></div></section>
 </main>
+<footer>Oxirgi Boshpana · Onlayn multiplayer</footer>
+<script src="/socket.io/socket.io.js"></script>
 <script>
-const decks={
- "KASB":["Shifokor","Muhandis","Agronom","O‘qituvchi","Elektrik","Oshpaz","Qutqaruvchi","Dasturchi","Veterinar","Mexanik","Psixolog","Geolog"],
- "SOG‘LIQ":["Sog‘lom","Yengil allergiya","Qo‘li singan, bitish jarayonida","Kuchli immunitet","Uyqusizlik muammosi","Birinchi yordamni biladi","Sovuqqa chidamli"],
- "KO‘NIKMA":["Suvni tozalay oladi","Radio aloqa tuzadi","O‘simlik yetishtiradi","Oziq-ovqatni uzoq saqlaydi","Jamoani tinchlantiradi","Asboblarni ta’mirlaydi","Iz qoldirmay yuradi"],
- "SIR":["Boshpananing eski xaritasini biladi","Yashirin oziq-ovqat zaxirasi bor","Bir kishiga qarzdor","O‘tmishda qutqaruvchi bo‘lgan","Muhim signalni eshitgan","Jamoada kimnidir taniydi"]
-};
-const disasters=[
-["Kuchli quyosh bo‘roni","Elektr tarmoqlari ishdan chiqqan. Tashqarida aloqa vositalari ishlamasligi mumkin."],
-["Uzoq davom etgan chang bo‘roni","Havo filtrlari cheklangan. Suv va oziq-ovqatni tejash kerak."],
-["Noma’lum epidemiya","Tashqaridagi hududlar xavfli. Tibbiy bilim va toza suv muhim."],
-["Katta zilzila","Binolar qulagan, yo‘llar to‘silgan. Muhandislik ko‘nikmalari kerak."]
-];
-let state={people:[],cards:[],selected:null};
-const $=id=>document.getElementById(id);
-function pick(a){return a[Math.floor(Math.random()*a.length)]}
-function shuffle(a){return a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).map(x=>x[1])}
-function start(){
- const n=+$("count").value, names=[$("nickname").value.trim()||"O‘yinchi 1"];
- for(let i=2;i<=n;i++)names.push("O‘yinchi "+i);
- state.people=names.map((name,i)=>({name,alive:true,cards:Object.keys(decks).map(kind=>({kind,value:pick(decks[kind]),revealed:false}))}));
- state.selected=null;
- const d=pick(disasters);$("disaster").textContent=d[0];$("scenario").textContent=d[1];
- $("home").classList.add("hidden");$("rulesBox").classList.add("hidden");$("game").classList.remove("hidden");$("votePanel").classList.add("hidden");
- renderPlayers();renderCards();window.scrollTo({top:0,behavior:"smooth"});
-}
-function renderPlayers(){$("players").innerHTML=state.people.map((p,i)=>`<div class="player"><strong>${esc(p.name)}</strong><span class="tag">${p.alive?"O‘yinda":"Chiqarilgan"}</span><div class="muted" style="font-size:12px;margin-top:5px">${p.cards.filter(c=>c.revealed).length}/4 karta ochilgan</div></div>`).join("")}
-function renderCards(){$("cards").innerHTML=state.people[0].cards.map((c,i)=>`<button class="card ${c.revealed?"revealed":""}" data-i="${i}"><span class="kind">${c.revealed?esc(c.kind):"YOPIQ KARTA"}</span><span class="value">${c.revealed?esc(c.value):"?"}</span><span class="hint">${c.revealed?"Ochilgan — qayta bosing":"Ochish uchun bosing"}</span></button>`).join("");$("cards").querySelectorAll("button").forEach(b=>b.onclick=()=>{let c=state.people[0].cards[+b.dataset.i];c.revealed=!c.revealed;renderCards();renderPlayers()})}
-function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-$("start").onclick=start;$("restart").onclick=()=>{$("game").classList.add("hidden");$("home").classList.remove("hidden")};
-$("rules").onclick=()=>$("rulesBox").classList.toggle("hidden");$("closeRules").onclick=()=>$("rulesBox").classList.add("hidden");
-$("voteStart").onclick=()=>{$("votePanel").classList.remove("hidden");$("voteOptions").innerHTML=state.people.map((p,i)=>`<button class="vote" data-i="${i}">${esc(p.name)}</button>`).join("");$("voteOptions").querySelectorAll("button").forEach(b=>b.onclick=()=>{state.selected=+b.dataset.i;$("voteOptions").querySelectorAll("button").forEach(x=>x.classList.toggle("selected",x===b))});$("result").textContent="";$("votePanel").scrollIntoView({behavior:"smooth"})};
-$("submitVote").onclick=()=>{if(state.selected===null){$("result").textContent="Avval o‘yinchini tanlang.";return}const p=state.people[state.selected];$("result").innerHTML=`<div class="panel"><div class="status">DEMO NATIJASI</div><h2>${esc(p.name)}</h2><p>Bu demo ovozi. Haqiqiy o‘yinda barcha o‘yinchilarning ovozlari serverda jamlanadi.</p></div>`};
-const socket = io("https://oxirgi-boshpana-server.onrender.com");
-let roomCode = "";
+(() => {
+  const $ = id => document.getElementById(id);
+  const socket = io("https://oxirgi-boshpana-server.onrender.com");
+  let roomCode = "";
+  let isHost = false;
+  let started = false;
+  let votingActive = false;
+  let voted = false;
+  let myCards = {};
+  let players = [];
+  const revealed = new Set();
 
-$("createRoom").onclick = () => {
-  const name = $("nickname").value.trim() || "O‘yinchi";
-
-  socket.emit("createRoom", name, (result) => {
-    if (result && result.ok) {
-      roomCode = result.code;
-      $("roomCode").value = result.code;
-      $("roomMessage").textContent =
-        "Xona yaratildi! Do‘stlaringga shu kodni yubor: " + result.code;
-    } else {
-      $("roomMessage").textContent = "Xona yaratilmadi. Qayta urinib ko‘r.";
-    }
-  });
-};
-
-$("joinRoom").onclick = () => {
-  const code = $("roomCode").value.trim().toUpperCase();
-  const name = $("nickname").value.trim() || "O‘yinchi";
-
-  if (!code) {
-    $("roomMessage").textContent = "Avval xona kodini kiriting.";
-    return;
+  function showStatus(message, error=false) {
+    const el = $("connectionStatus");
+    el.textContent = message;
+    el.classList.toggle("error", error);
   }
-
-  socket.emit("joinRoom", { code, name }, (result) => {
-    if (result && result.ok) {
-      roomCode = result.code;
-      $("roomMessage").textContent = "Xonaga muvaffaqiyatli qo‘shildingiz: " + result.code;
-    } else {
-      $("roomMessage").textContent =
-        result && result.error ? result.error : "Xonaga qo‘shilib bo‘lmadi.";
-    }
-  });
-};
-
-socket.on("playersUpdated", (players) => {
-  $("roomMessage").textContent =
-    "Xonadagi o‘yinchilar (" + players.length + "): " +
-    players.map(p => p.name).join(", ");
-});
-socket.on("privateCards", (cards) => {
-  $("onlineGame").classList.remove("hidden");
-
-  const area = $("onlineCards");
-  area.innerHTML = "";
-
-  for (const [type, value] of Object.entries(cards)) {
-    const card = document.createElement("div");
-    card.className = "panel";
-
-    const heading = document.createElement("h3");
-    heading.textContent = type;
-
-    const detail = document.createElement("p");
-    detail.textContent = value;
-
-    card.append(heading, detail);
-    area.appendChild(card);
+  function escapeText(value) {
+    return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
-});
-
-socket.on("gameStarted", (data) => {
-  $("roomMessage").textContent = data.message || "O‘yin boshlandi!";
-});
-$("startGame").onclick = () => {
-  if (!roomCode) {
-    $("roomMessage").textContent = "Avval xona yarat yoki unga qo‘shil.";
-    return;
+  function currentName() { return $("name").value.trim().slice(0,24) || "O‘yinchi"; }
+  function enterRoom(code, host) {
+    roomCode = code; isHost = host;
+    $("entryPanel").classList.add("hidden");
+    $("roomPanel").classList.remove("hidden");
+    $("roomCodeLabel").textContent = code;
+    $("hostNote").textContent = host ? "Siz xona egasisiz." : "Xona egasini kuting.";
+    $("startGameBtn").classList.toggle("hidden", !host);
+    $("startVotingBtn").classList.toggle("hidden", !host);
+    $("chatPanel").classList.remove("hidden");
+    $("liveColumns").classList.remove("hidden");
   }
-
-  socket.emit("startGame", roomCode, (result) => {
-    if (!result || !result.ok) {
-      $("roomMessage").textContent =
-        result && result.error ? result.error : "O‘yinni boshlash amalga oshmadi.";
+  function renderPlayers() {
+    $("playerCount").textContent = `(${players.length}/8)`;
+    $("players").innerHTML = "";
+    for (const p of players) {
+      const el = document.createElement("div");
+      el.className = "player";
+      el.innerHTML = `<span>${escapeText(p.name)}</span>${p.isHost ? '<span class="tag">Boshlovchi</span>' : ''}`;
+      $("players").append(el);
     }
+    renderVotePlayers();
+    $("startGameBtn").disabled = !isHost || players.length < 2 || started;
+    $("startVotingBtn").disabled = !isHost || !started || votingActive || players.length <= 2;
+  }
+  function renderCards() {
+    $("myCards").innerHTML = "";
+    for (const [category, value] of Object.entries(myCards)) {
+      const card = document.createElement("div");
+      card.className = "card";
+      const wasRevealed = revealed.has(category);
+      card.innerHTML = `<strong>${escapeText(category)}</strong><p>${wasRevealed ? escapeText(value) : "🔒 Maxfiy karta"}</p>`;
+      const btn = document.createElement("button");
+      btn.className = wasRevealed ? "secondary" : "";
+      btn.textContent = wasRevealed ? "Ochildi" : "Kartani ochish";
+      btn.disabled = wasRevealed || !started;
+      btn.addEventListener("click", () => {
+        socket.emit("revealCard", { code: roomCode, category }, result => {
+          if (!result?.ok) showStatus(result?.error || "Kartani ochib bo‘lmadi.", true);
+        });
+      });
+      card.append(btn);
+      $("myCards").append(card);
+    }
+  }
+  function renderVotePlayers() {
+    const area = $("votePlayers");
+    area.innerHTML = "";
+    if (!votingActive) return;
+    for (const p of players) {
+      if (p.id === socket.id) continue;
+      const row = document.createElement("div");
+      row.className = "player";
+      const name = document.createElement("span");
+      name.textContent = p.name;
+      const btn = document.createElement("button");
+      btn.textContent = "Ovoz berish";
+      btn.disabled = voted;
+      btn.addEventListener("click", () => {
+        socket.emit("castVote", { code: roomCode, targetId: p.id }, result => {
+          if (!result?.ok) {
+            $("voteStatus").textContent = result?.error || "Ovoz berilmadi.";
+            return;
+          }
+          voted = true;
+          $("voteStatus").textContent = `Ovozingiz qabul qilindi. Boshqa o‘yinchilarni kuting.`;
+          renderVotePlayers();
+        });
+      });
+      row.append(name, btn);
+      area.append(row);
+    }
+    if (area.children.length === 0) area.textContent = "Ovoz berish uchun boshqa o‘yinchi yo‘q.";
+  }
+  function addChat(name, message, system=false) {
+    const line = document.createElement("div");
+    line.className = "chatline";
+    if (system) line.textContent = message;
+    else {
+      const b = document.createElement("b");
+      b.textContent = name + ": ";
+      line.append(b, document.createTextNode(message));
+    }
+    $("chatLog").append(line);
+    $("chatLog").scrollTop = $("chatLog").scrollHeight;
+  }
+  $("createBtn").addEventListener("click", () => {
+    socket.emit("createRoom", currentName(), result => {
+      if (!result?.ok) return showStatus(result?.error || "Xona yaratilmadi.", true);
+      enterRoom(result.code, true);
+      showStatus("Xona yaratildi. Kodni do‘stlaringizga yuboring.");
+    });
   });
-};
+  $("joinBtn").addEventListener("click", () => {
+    const code = $("roomCode").value.trim().toUpperCase();
+    if (!code) return showStatus("Xona kodini kiriting.", true);
+    socket.emit("joinRoom", { code, name: currentName() }, result => {
+      if (!result?.ok) return showStatus(result?.error || "Xonaga kirib bo‘lmadi.", true);
+      enterRoom(result.code, false);
+      showStatus("Xonaga muvaffaqiyatli qo‘shildingiz.");
+    });
+  });
+  $("copyCodeBtn").addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText(roomCode); $("copyCodeBtn").textContent = "Nusxalandi!"; }
+    catch { $("roomCodeLabel").textContent = roomCode; showStatus("Xona kodini qo‘lda nusxalang."); }
+  });
+  $("startGameBtn").addEventListener("click", () => {
+    socket.emit("startGame", roomCode, result => {
+      if (!result?.ok) showStatus(result?.error || "O‘yin boshlanmadi.", true);
+    });
+  });
+  $("startVotingBtn").addEventListener("click", () => {
+    socket.emit("startVoting", roomCode, result => {
+      if (!result?.ok) $("voteStatus").textContent = result?.error || "Ovoz berish boshlanmadi.";
+    });
+  });
+  $("chatForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const message = $("chatInput").value.trim();
+    if (!message || !roomCode) return;
+    socket.emit("chatMessage", { code: roomCode, message }, result => {
+      if (!result?.ok) addChat("Tizim", result?.error || "Xabar yuborilmadi.", true);
+      else $("chatInput").value = "";
+    });
+  });
+
+  socket.on("connect", () => showStatus("Serverga ulandi."));
+  socket.on("disconnect", () => showStatus("Aloqa uzildi. Sahifani qayta yuklab ko‘ring.", true));
+  socket.on("playersUpdated", list => {
+    players = list || [];
+    if (roomCode) {
+      const self = players.find(p => p.id === socket.id);
+      isHost = !!self?.isHost;
+      $("hostNote").textContent = isHost ? "Siz xona egasisiz." : "Xona egasini kuting.";
+      $("startGameBtn").classList.toggle("hidden", !isHost);
+      $("startVotingBtn").classList.toggle("hidden", !isHost);
+    }
+    renderPlayers();
+  });
+  socket.on("privateCards", cards => {
+    myCards = cards || {}; revealed.clear(); started = true;
+    $("gamePanel").classList.remove("hidden");
+    $("gameBadge").textContent = "O‘yin davom etmoqda";
+    renderCards(); renderPlayers();
+  });
+  socket.on("gameStarted", data => {
+    started = true;
+    $("gamePanel").classList.remove("hidden");
+    $("voteStatus").textContent = data?.message || "O‘yin boshlandi.";
+    renderPlayers();
+  });
+  socket.on("cardRevealed", data => {
+    if (data.playerId === socket.id) revealed.add(data.category);
+    renderCards();
+    const item = document.createElement("article");
+    item.innerHTML = `<b>${escapeText(data.playerName)} — ${escapeText(data.category)}</b><div>${escapeText(data.value)}</div>`;
+    $("revealedFeed").prepend(item);
+    if (data.playerId === socket.id) addChat("Tizim", `${data.category} kartangiz ochildi.`, true);
+  });
+  socket.on("votingStarted", data => {
+    votingActive = true; voted = false;
+    $("voteStatus").textContent = `Ovoz berish boshlandi: ${data.players.length} o‘yinchi.`;
+    $("startVotingBtn").disabled = true;
+    renderVotePlayers();
+  });
+  socket.on("votingCancelled", data => {
+    votingActive = false; voted = false;
+    $("voteStatus").textContent = data?.message || "Ovoz berish bekor qilindi.";
+    renderPlayers();
+  });
+  socket.on("voteProgress", data => {
+    $("voteStatus").textContent = `Ovozlar: ${data.voted}/${data.total}`;
+  });
+  socket.on("votingResult", data => {
+    votingActive = false; voted = false;
+    $("voteStatus").textContent = data.message || "Ovoz berish tugadi.";
+    if (data.eliminated?.length) addChat("Tizim", `${data.eliminated[0].name} o‘yindan chiqarildi.`, true);
+    renderPlayers();
+  });
+  socket.on("gameFinished", data => {
+    started = true; votingActive = false;
+    $("resultPanel").classList.remove("hidden");
+    $("resultText").textContent = data.message + " G‘oliblar: " + data.winners.map(p => p.name).join(" va ") + ".";
+    $("gameBadge").textContent = "O‘yin tugadi";
+    $("startVotingBtn").disabled = true;
+    $("voteStatus").textContent = data.message;
+    renderVotePlayers();
+  });
+  socket.on("chatMessage", data => addChat(data.playerName, data.message));
+  socket.on("systemMessage", data => addChat("Tizim", data.text, true));
+})();
 </script>
 </body>
 </html>
